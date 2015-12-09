@@ -129,11 +129,10 @@
 ;   (debug "Set-Params!")
 ;   (om/set-query! this {:params {:page (get route->query route)}}))
 
-(defui Root
+(defui Router
   static om/IQuery
   (query [this]
     [:route])
-
   Object
   (nav-handler
     [this match]
@@ -144,17 +143,8 @@
       ;[(app/set-page! ~match) :page]
       (om/transact! this `[(route/update {:new-route ~route})])))
 
-  ; (componentWillReceiveProps
-  ;   [this props]
-  ;   "Sync: OM -> Browser"
-  ;   (let [[old-route new-route] [(:route (om/props this)) (:route props)]]
-  ;     (debug "componentWillReceiveProps" old-route new-route)
-  ;     (when (not= new-route old-route)
-  ;       ;(update-query-from-route! this new-route)
-  ;       (pushy/set-token! history (or (route->url new-route) "/unknown-route")))))
-
   (componentDidMount [this]
-    (debug "App mounted")
+    (debug "Router mounted")
     (let [nav-fn #(.nav-handler this %)
           pushy (pushy/pushy nav-fn parse-url)]
       (debug "HISTORY/get-token" (pushy/get-token pushy))
@@ -162,16 +152,15 @@
       (set! history pushy)))
 
   (componentWillUnmount [this]
-    (debug "App unmounting")
+    (debug "Router unmounting")
     (pushy/stop! history))
 
   (render [this]
     (let [{:keys [route]} (om/props this)
           route-key (key (first route))
-          page-data (route-key route)
           entries (vals (second routes))]
 
-      (debug "RENDERING" route-key)
+      (debug "RENDERING Router")
 
       (dom/div nil
         ;; routing via pushy
@@ -195,6 +184,18 @@
         (dom/div nil
           (dom/p nil "current page:")
           ((route->factory route-key) page-data))))))
+
+(defui Root
+  static om/IQuery
+  (query [this]
+    [{:pages route->query} {[:router _] (om/get-query Router)}])
+  Object
+  (render [this]
+    (let [page-data (:pages (om/props))]
+
+      (debug "RENDERING Root")
+
+      ((om/factory Router) page-data))))
 
 (def parser (om/parser {:read read :mutate mutate}))
 
