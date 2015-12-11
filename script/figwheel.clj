@@ -9,6 +9,7 @@
     :figwheel true
     :source-paths ["src"]
     :compiler {:main 'om-router.core
+               :optimizations :advanced
                :asset-path "js"
                :output-to "resources/public/js/main.js"
                :output-dir "resources/public/js"
