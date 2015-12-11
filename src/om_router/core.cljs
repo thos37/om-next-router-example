@@ -188,16 +188,11 @@
 
 (defmulti read om/dispatch)
 
-(defn get-route []
-  (let [location js/window.location.pathname
-        route (:handler (parse-url location))]
+(defn get-route [db]
+  (let [ent (d/pull db '[:route] [:db/ident :router])
+        route (:route ent)]
+    (debug "get-route" route)
     route))
-
-;(defn get-route [db]
-;  (let [ent (d/pull db '[:route] [:db/ident :router])
-;        route (:route ent)]
-;    (debug "get-route" route)
-;    route))
 
 (defn get-page [db route query]
   (let [ ;query (route->query route)
@@ -211,8 +206,7 @@
   (let [db @state
         _ (debug "READ :route query" query)
         _ (debug "READ :route ast" ast)
-        ;route (get-route)
-        route (key (first query))
+        route (get-route db)
         page-query (route query)
         page (get-page db route page-query)
         route {route page}
@@ -283,17 +277,10 @@
   "Sync: Browser -> OM"
   (debug "Pushy caught a nav change" match)
   (let [{new-route :handler} match
-        old-route (get-route)
-        _ (debug "route change" old-route new-route)
-        new-query [{:route {new-route (new-route route->query)}}]
-        _ (debug "new-query" new-query (om/query->ast new-query))
-        ]
-    (om/set-query! reconciler {:query new-query})
-    ;(if-not (= old-route new-route)
-    ;  ;(om/transact! reconciler `[(route/update {:new-route ~new-route})])
-    ;
-    ;  )
-    ))
+        old-route (get-route @conn)
+        _ (debug "route change" old-route new-route )]
+    (if-not (= old-route new-route)
+      (om/transact! reconciler `[(route/update {:new-route ~new-route})]))))
 
 (let [location js/window.location.pathname
       route (:handler (parse-url location))
