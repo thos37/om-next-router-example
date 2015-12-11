@@ -2,7 +2,7 @@
   :description "My first Om program!"
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/clojurescript "1.7.189"]
-                 [org.omcljs/om "1.0.0-alpha27-SNAPSHOT"]
+                 [org.omcljs/om "1.0.0-alpha26"]
                  [figwheel-sidecar "0.5.0-2" :scope "provided"]
                  [bidi "1.23.1"]
                  [kibu/pushy "0.3.6"]
