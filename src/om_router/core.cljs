@@ -174,6 +174,7 @@
   (render [this]
     (let [{:keys [route page]} (om/props this)
           entries (vals (second routes))]
+      (debug "RENDER ROOT")
       (dom/div nil
         (dom/ul nil
           (apply dom/ul nil
