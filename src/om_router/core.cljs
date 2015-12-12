@@ -12,7 +12,7 @@
 
 ;;; app state
 
-(defonce conn
+(def conn
   (d/create-conn
     {:db/ident {:db/unique :db.unique/identity}
      :pg/id {:db/unique :db.unique/identity}}))
@@ -196,10 +196,14 @@
 
 (defn get-page [db route query]
   (let [ ;query (route->query route)
-        page (d/pull db query [:pg/id route])]
+        page-data (d/pull db query [:pg/id route])
+        join-data nil]
 
-    (debug "get-page" query page)
-    page))
+    ;(om/tree->db (:component (meta (:index route->query))) (:index route->query))
+
+    (debug "get-page" query page-data)
+
+    page-data))
 
 (defmethod read :route
   [{:keys [state query ast]} _ params]
@@ -208,8 +212,10 @@
         _ (debug "READ :route ast" ast)
         route (get-route db)
         page-query (route query)
-        page (get-page db route page-query)
-        route {route page}
+        _ (debug "READ :route page-query" page-query)
+        page-data (get-page db route page-query)
+        _ (debug "READ :route page-data" page-data)
+        route {route page-data}
         _ (debug "READ :route" route)]
     {:value route}))
 
